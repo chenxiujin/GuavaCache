@@ -1,0 +1,92 @@
+package com.demo.cache;
+
+import com.google.common.cache.CacheStats;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ExecutionError;
+import com.google.common.util.concurrent.UncheckedExecutionException;
+import com.sun.istack.internal.Nullable;
+
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+
+/**
+ * @author cxiujin
+ * @date 2019/08/27 9:40
+ */
+public interface GuavaCacheService {
+
+        /**
+         * 返回与此缓存中的 key 关联的值，如果 key 没有缓存值，则返回 null
+         * @param key
+         * @return Object
+         */
+        @Nullable
+        Object getIfPresent(String key);
+
+        /**
+         *
+         * 如果有缓存则从缓存返回，没有则调用Callable查询放入缓存再返回
+         * @throws ExecutionException 如果在加载值时抛出了已检查的异常
+         * @throws UncheckedExecutionException 如果在加载时抛出未经检查的异常
+         * @throws ExecutionError 如果在加载值时抛出错误
+         */
+        Object get(String key, Callable valueLoader) throws ExecutionException;
+
+        /**
+         * 返回此缓存中与 keys 关联的值的映射。返回的映射将仅包含缓存中已存在的条目。
+         * @param keys
+         * @return map
+         */
+        ImmutableMap<String, Object> getAllPresent(Iterable<String> keys);
+
+        /**
+         * 在此缓存中将value 与 key 关联。如果缓存先前包含旧值，则旧值将替换为新值 value
+         */
+        void put(String key, Object value);
+
+        /**
+         * 对map中每个元素一一放入缓存
+         * @param map Map<Key,Value>
+         */
+        void putAll(Map<String, Object> map);
+
+        /**
+         * 删除key的值
+         */
+        void invalidate(String key);
+
+        /**
+         * 删除多个key的值
+         */
+        void invalidateAll(Iterable<String> keys);
+
+        /**
+         * 清空缓存所有key的值
+         */
+        void invalidateAll();
+
+        /**
+         * 返回缓存中的近似条目数(key的数量)
+         */
+        long size();
+
+        /**
+         * 返回此缓存的累积统计信息的当前快照。所有统计信息都初始化为零，并且在缓存的生命周期内单调递增
+         *
+         */
+        CacheStats stats();
+
+        /**
+         * 返回存储在此缓存中的条目视图作为线程安全映射。对map所做的修改会直接影响缓存。返回映射中的迭代器至少
+         * 是弱一致：它们对于并发使用是安全的，但是如果在创建迭代器之后修改了缓存（包括逐出），那么未定义哪个
+         * 更改（如果有）将反映在该迭代器中。
+         */
+        ConcurrentMap<String, Object> asMap();
+
+        /**
+         * 执行缓存所需的任何挂起的维护操作。确切地说，执行哪些活动（如果有的话）依赖于实现
+         */
+        void cleanUp();
+}
